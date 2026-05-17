@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asian Translator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Nunito:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+
+    <!-- ░░ BACKGROUND GRID ░░ -->
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-glow" aria-hidden="true"></div>
+
+    <header class="site-header">
+        <div class="logo">
+            <span class="logo-icon">◈</span>
+            <span class="logo-text">Asian<em>Translator</em></span>
+        </div>
+        <div class="header-meta">
+            <span class="badge"></span>
+            <span class="badge badge-rlhf" id="rlhfBadge" hidden>RLHF Mode</span>
+        </div>
+    </header>
+
+    <main class="app-shell">
+
+        <!-- ══════════════════ LANGUAGE BAR ══════════════════ -->
+        <section class="lang-bar glass">
+            <div class="lang-select-group">
+                <label class="select-label">Nguồn</label>
+                <select id="srcLang" class="lang-select">
+                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="en" selected>🇬🇧 English</option>
+                    <option value="fil">🇵🇭 Filipino</option>
+                    <option value="khm">🇰🇭 Khmer</option>
+                    <option value="lo">🇱🇦 Lao</option>
+                    <option value="th">🇹🇭 Thai</option>
+                    <option value="my">🇲🇲 Myanmar</option>
+                    <option value="id">🇮🇩 Bahasa Indonesia</option>
+                    <option value="ms">🇲🇾 Malay</option>
+                </select>
+            </div>
+
+            <button class="swap-btn" id="swapBtn" title="Đổi ngôn ngữ">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M17 4l4 4-4 4" />
+                    <path d="M3 8h18" />
+                    <path d="M7 20l-4-4 4-4" />
+                    <path d="M21 16H3" />
+                </svg>
+            </button>
+
+            <div class="lang-select-group">
+                <label class="select-label">Đích</label>
+                <select id="tgtLang" class="lang-select">
+                    <option value="vi" selected>🇻🇳 Tiếng Việt</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="fil">🇵🇭 Filipino</option>
+                    <option value="khm">🇰🇭 Khmer</option>
+                    <option value="lo">🇱🇦 Lao</option>
+                    <option value="th">🇹🇭 Thai</option>
+                    <option value="my">🇲🇲 Myanmar</option>
+                    <option value="id">🇮🇩 Bahasa Indonesia</option>
+                    <option value="ms">🇲🇾 Malay</option>
+                </select>
+            </div>
+
+            <!-- PIVOT TOGGLE -->
+            <div class="pivot-group">
+                <label class="toggle-label">
+                    <input type="checkbox" id="pivotToggle" />
+                    <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                    Pivot
+                </label>
+                <select id="pivotLang" class="lang-select pivot-select" hidden>
+                    <option value="en" selected>🇬🇧 English</option>
+                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="fil">🇵🇭 Filipino</option>
+                    <option value="id">🇮🇩 Bahasa Indonesia</option>
+                    <option value="ms">🇲🇾 Malay</option>
+                    <option value="th">🇹🇭 Thai</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- ══════════════════ TRANSLATION PANELS ══════════════════ -->
+        <section class="panels">
+
+            <!-- SOURCE -->
+            <div class="panel glass" id="sourcePanel">
+                <div class="panel-header">
+                    <span class="panel-title">Văn bản gốc</span>
+                    <div class="panel-actions">
+                        <button class="icon-btn" id="micBtn" title="Nhập bằng giọng nói">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" />
+                            </svg>
+                        </button>
+                        <button class="icon-btn" id="clearBtn" title="Xóa">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6 6 18M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <textarea id="srcText" class="text-area" placeholder="Nhập văn bản cần dịch…" spellcheck="false"
+                    rows="9"></textarea>
+                <div class="panel-footer">
+                    <span class="char-count" id="charCount">0 ký tự</span>
+                    <button class="translate-btn" id="translateBtn">
+                        <span class="btn-text">Dịch</span>
+                        <svg class="btn-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TARGET -->
+            <div class="panel glass" id="targetPanel">
+                <div class="panel-header">
+                    <span class="panel-title">Bản dịch</span>
+                    <div class="panel-actions">
+                        <button class="icon-btn" id="speakBtn" title="Đọc bản dịch" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14" />
+                            </svg>
+                        </button>
+                        <button class="icon-btn" id="copyBtn" title="Sao chép" disabled>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div id="tgtText" class="text-area output-area" aria-live="polite">
+                    <span class="placeholder-text">Bản dịch sẽ xuất hiện ở đây…</span>
+                </div>
+                <div class="panel-footer">
+                    <div class="status-area" id="statusArea"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════ RLHF PANEL ══════════════════ -->
+        <section class="rlhf-panel glass" id="rlhfPanel" hidden>
+            <div class="rlhf-header">
+                <span class="rlhf-icon">⊕</span>
+                <span>Hai bản dịch được tạo — hãy chọn bản tốt hơn để cải thiện mô hình</span>
+            </div>
+            <div class="rlhf-options">
+                <button class="rlhf-option" id="optionA">
+                    <span class="option-label">Phương án A</span>
+                    <span class="option-text" id="optionAText"></span>
+                    <span class="option-select">Chọn ✓</span>
+                </button>
+                <button class="rlhf-option" id="optionB">
+                    <span class="option-label">Phương án B</span>
+                    <span class="option-text" id="optionBText"></span>
+                    <span class="option-select">Chọn ✓</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- ══════════════════ PARAMETERS PANEL ══════════════════ -->
+        <details class="params-panel glass" id="paramsPanel">
+            <summary class="params-toggle">
+                <span>⚙ Tham số sinh văn bản</span>
+                <span class="params-chevron">›</span>
+            </summary>
+            <div class="params-grid">
+
+                <div class="param-group">
+                    <label class="param-label">Phương pháp</label>
+                    <select id="paramMethod" class="param-select">
+                        <option value="beam" selected>Beam Search</option>
+                        <option value="greedy">Greedy Search</option>
+                        <option value="sampling">Sampling</option>
+                    </select>
+                </div>
+
+                <div class="param-group">
+                    <label class="param-label">Max Length <span class="param-val" id="maxLenVal">400</span></label>
+                    <input type="range" id="paramMaxLen" class="param-slider" min="64" max="1024" value="400"
+                        step="16" />
+                </div>
+
+                <div class="param-group" id="beamGroup">
+                    <label class="param-label">Num Beams <span class="param-val" id="numBeamsVal">5</span></label>
+                    <input type="range" id="paramNumBeams" class="param-slider" min="1" max="12" value="5" step="1" />
+                </div>
+
+                <div class="param-group sampling-only" style="display:none">
+                    <label class="param-label">Temperature <span class="param-val" id="tempVal">1.00</span></label>
+                    <input type="range" id="paramTemp" class="param-slider" min="0.1" max="2.0" value="1.0"
+                        step="0.05" />
+                </div>
+
+                <div class="param-group sampling-only" style="display:none">
+                    <label class="param-label">Top-K <span class="param-val" id="topKVal">50</span></label>
+                    <input type="range" id="paramTopK" class="param-slider" min="0" max="200" value="50" step="5" />
+                </div>
+
+                <div class="param-group sampling-only" style="display:none">
+                    <label class="param-label">Top-P <span class="param-val" id="topPVal">0.90</span></label>
+                    <input type="range" id="paramTopP" class="param-slider" min="0.1" max="1.0" value="0.9"
+                        step="0.05" />
+                </div>
+
+            </div>
+        </details>
+
+    </main>
+
+    <footer class="site-footer">
+        <span>Asian Translator · NLLB-200 · Hugging Face</span>
+    </footer>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
