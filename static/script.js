@@ -261,17 +261,54 @@ copyBtn.addEventListener("click", async () => {
 });
 
 // ─── Text-to-Speech ──────────────────────────────────────────────────────────
+const AUDIO_SUPPORT = ["vi", "en", "fil", "th", "id", "ms", "khm", "my"];
+let currentAudio = null;
+
 speakBtn.addEventListener("click", () => {
     const text = tgtText.textContent;
-    if (!text || window.speechSynthesis.speaking) {
+    if (!text) return;
+    
+    // Stop if already speaking backend audio
+    if (currentAudio && !currentAudio.paused) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+        return;
+    }
+    // Stop if already speaking frontend audio
+    if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
         return;
     }
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = BCP47[tgtLang.value] || "en-US";
-    utt.rate = 0.95;
-    window.speechSynthesis.speak(utt);
-    showToast(`🔊 Đọc bằng giọng ${utt.lang}`);
+    
+    const lang = tgtLang.value;
+    
+    if (AUDIO_SUPPORT.includes(lang)) {
+        // Use Backend TTS (gTTS)
+        currentAudio = new Audio(`/tts?text=${encodeURIComponent(text)}&lang=${lang}`);
+        currentAudio.play();
+        showToast(`🔊 Đang đọc bản dịch...`);
+    } else {
+        // Fallback Web Speech API (e.g., for Lao)
+        const utt = new SpeechSynthesisUtterance(text);
+        const targetLang = BCP47[lang] || "en-US";
+        utt.lang = targetLang;
+        utt.rate = 0.95;
+        
+        // Try to match voice explicitly
+        const prefix = targetLang.split('-')[0];
+        const voice = window.speechSynthesis.getVoices().find(v => 
+            v.lang === targetLang || v.lang.replace('_', '-').startsWith(prefix)
+        );
+        
+        if (voice) {
+            utt.voice = voice;
+            window.speechSynthesis.speak(utt);
+            showToast(`🔊 Đọc bằng giọng ${voice.name}`);
+        } else {
+            window.speechSynthesis.speak(utt);
+            showToast(`⚠️ Trình duyệt chưa cài giọng chuẩn cho ${targetLang}. Đang dùng giọng mặc định.`);
+        }
+    }
 });
 
 // ─── Speech-to-Text (Web Speech API) ────────────────────────────────────────

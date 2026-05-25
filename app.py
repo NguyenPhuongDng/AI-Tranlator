@@ -1,7 +1,7 @@
 import os
 import json
 import random
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 
 app = Flask(__name__)
 
@@ -89,6 +89,38 @@ def rlhf_feedback():
         f.write('\n')
         
     return jsonify({"status": "success"})
+
+@app.route('/tts', methods=['GET'])
+def get_tts():
+    text = request.args.get('text', '')
+    lang = request.args.get('lang', 'vi')
+    
+    # Mapping frontend lang codes to gTTS lang codes
+    gtts_lang_map = {
+        'vi': 'vi', 'en': 'en', 'fil': 'tl',
+        'th': 'th', 'id': 'id', 'ms': 'ms',
+        'khm': 'km', 'my': 'my'
+        # 'lo' is not officially supported by gtts, will fallback on frontend
+    }
+    
+    if not text:
+        return jsonify({"error": "No text provided"}), 400
+        
+    gtts_lang = gtts_lang_map.get(lang)
+    if not gtts_lang:
+        return jsonify({"error": "Language not supported for backend TTS"}), 400
+        
+    try:
+        from gtts import gTTS
+        import io
+        tts = gTTS(text=text, lang=gtts_lang)
+        fp = io.BytesIO()
+        tts.write_to_fp(fp)
+        fp.seek(0)
+        return send_file(fp, mimetype='audio/mpeg')
+    except Exception as e:
+        print(f"TTS Error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

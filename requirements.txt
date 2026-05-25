@@ -7,3 +7,4 @@ peft==0.18.1
 tokenizers==0.22.2
 accelerate==1.13.0
 sentencepiece
+gTTS
